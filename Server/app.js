@@ -6,6 +6,7 @@ var logger = require('morgan');
 var adminRouter = require('./routes/admin');
 const { connection } = require('./config/database');
 var cors = require('cors');
+require('dotenv').config();
 
 var app = express();
 app.use(cors());
@@ -18,6 +19,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', adminRouter);
+
+// if (process.env.NODE_ENV === 'production') {
+//   app.use(express.static(path.join(__dirname, 'build')));
+
+//   app.get('*', (req, res) => {
+//     res.sendFile(path.resolve(__dirname, '../client/build', 'index.html'));
+//   });
+// }
 
 
 // catch 404 and forward to error handler

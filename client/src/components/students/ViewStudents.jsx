@@ -25,7 +25,7 @@ const ViewStudents = () => {
         console.log(err);
         naviget('/error');
       });
-  }, [naviget, deleted]);
+  }, [naviget, deleted,open]);
 
   const deleteStudent = (studentId) => {
     axiosUrl
@@ -113,7 +113,11 @@ const ViewStudents = () => {
           })}
         </Box>
       </Box>
-      <EditStudent open={open} setOpen={setOpen} studentId={studentId} />
+      {open ? (
+        <EditStudent open={open} setOpen={setOpen} studentId={studentId} />
+      ) : (
+        ''
+      )}
     </div>
   );
 };

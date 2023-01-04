@@ -11,7 +11,7 @@ const ViewBooks = () => {
   const [books, setBooks] = useState([]);
   const [deleted, setDeleted] = useState();
   const [open, setOpen] = useState(false);
-  const [bookInfo, setBookInfo] = useState('');
+  const [bookId, setBookId] = useState(false);
 
   useEffect(() => {
     axiosUrl
@@ -23,7 +23,7 @@ const ViewBooks = () => {
         console.log(err);
         naviget('/error');
       });
-  }, [naviget, deleted]);
+  }, [naviget, deleted, open]);
 
   const deleteBook = (bookId) => {
     axiosUrl
@@ -34,20 +34,6 @@ const ViewBooks = () => {
       })
       .then((result) => {
         setDeleted(Math.random());
-      })
-      .catch((err) => {
-        console.log(err);
-        naviget('/error');
-      });
-  };
-
-  const getBookInfo = (bookId) => {
-    axiosUrl
-      .get('/getBookInfo', {
-        params: { bookId },
-      })
-      .then((result) => {
-        setBookInfo(result.data);
       })
       .catch((err) => {
         console.log(err);
@@ -112,7 +98,7 @@ const ViewBooks = () => {
                     sx={{ cursor: 'pointer' }}
                     onClick={() => {
                       setOpen(true);
-                      getBookInfo(book._id);
+                      setBookId(book._id);
                     }}
                   >
                     <EditIcon />
@@ -131,7 +117,7 @@ const ViewBooks = () => {
           })}
         </Box>
       </Box>
-      <EditBooks open={open} setOpen={setOpen} bookInfo={bookInfo} />
+      {open ? <EditBooks open={open} setOpen={setOpen} bookId={bookId} /> : ''}
     </div>
   );
 };

@@ -21,42 +21,85 @@ const AddStudents = () => {
   const [mobileExi, setMobileExi] = useState(false);
   const [noImage, setNoimage] = useState(false);
   const [posted, setPosted] = useState(false);
+  const [imageSize, setImageSizs] = useState(false);
+  const [emailValid, setEmailValid] = useState(false);
+  const [mobileValid, setMobleNameValid] = useState(false);
+  const [formValid, setFormValid] = useState(false);
   console.log(image);
+  console.log(imageSize);
+
+  const validateEmail = () => {
+    const validRegex =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (email.match(validRegex)) {
+      setEmailValid(false);
+    } else {
+      setEmailValid(true);
+    }
+  };
+
+  const validatMobile = () => {
+    const number = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+    if (mobile.match(number)) {
+      setMobleNameValid(false);
+    } else {
+      setMobleNameValid(true);
+    }
+  };
+
+  const imageValid = () => {
+    if (image?.file?.size > 2000000) {
+      setImageSizs(false);
+    } else {
+      setImageSizs(true);
+    }
+  };
 
   const AddNewStudents = () => {
-    const data = new FormData();
-    data.append('file', image.file);
-    axiosUrl
-      .post('/addStudent', data, {
-        params: {
-          name,
-          course,
-          email,
-          mobile,
-        },
-      })
-      .then((result) => {
-        console.log(result.data);
-        if (result.data.emailExi) setEmailExi(true);
-        if (result.data.mobileExi) setMobileExi(true);
-        if (result.data.noFile) setNoimage(true);
-        if (result.data.posted) {
-          setPosted(true);
-          setMobile('');
-          setName('');
-          setEmail('');
-          setCourse('');
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        naviget('/error');
-      });
+    if (
+      name === '' ||
+      course === '' ||
+      mobileValid ||
+      emailValid ||
+      !imageSize
+    ) {
+      setFormValid(true);
+    } else {
+      const data = new FormData();
+      data.append('file', image.file);
+      axiosUrl
+        .post('/addStudent', data, {
+          params: {
+            name,
+            course,
+            email,
+            mobile,
+          },
+        })
+        .then((result) => {
+          if (result.data.emailExi) setEmailExi(true);
+          if (result.data.mobileExi) setMobileExi(true);
+          if (result.data.noFile) setNoimage(true);
+          if (result.data.posted) {
+            setPosted(true);
+            setMobile('');
+            setName('');
+            setEmail('');
+            setCourse('');
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          naviget('/error');
+        });
+    }
+
     setTimeout(() => {
       setNoimage(false);
       setMobileExi(false);
       setEmailExi(false);
       setPosted(false);
+      setFormValid(false);
     }, 3000);
   };
 
@@ -79,6 +122,22 @@ const AddStudents = () => {
                   severity="success"
                 >
                   <Box>New student added</Box>
+                </Alert>
+              ) : (
+                ''
+              )}
+              {formValid ? (
+                <Alert
+                  sx={{
+                    marginTop: 5,
+                    fontSize: 12,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                  severity="success"
+                >
+                  <Box>Fill the form properly</Box>
                 </Alert>
               ) : (
                 ''
@@ -110,10 +169,16 @@ const AddStudents = () => {
                   id="outlined-size-small"
                   size="small"
                   value={email}
+                  onKeyUp={validateEmail}
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 {emailExi ? (
                   <FormHelperText error>Email Exist</FormHelperText>
+                ) : (
+                  ''
+                )}
+                {emailValid ? (
+                  <FormHelperText error>Enter proper email </FormHelperText>
                 ) : (
                   ''
                 )}
@@ -125,6 +190,7 @@ const AddStudents = () => {
                   id="outlined-size-small"
                   size="small"
                   value={mobile}
+                  onKeyUp={validatMobile}
                   onChange={(e) => setMobile(e.target.value)}
                 />
                 {mobileExi ? (
@@ -132,14 +198,26 @@ const AddStudents = () => {
                 ) : (
                   ''
                 )}
+                {mobileValid ? (
+                  <FormHelperText error>
+                    Enter valid mobile number
+                  </FormHelperText>
+                ) : (
+                  ''
+                )}
               </Box>
               <Box p mt={2}>
-                <Typography>Image</Typography>
+                <Typography>
+                  Image <span style={{ fontSize: 12 }}>(Max 2 MB size)</span>
+                </Typography>
                 <input
                   type="file"
                   accept="image/*"
                   placeholder="Upload your Resume"
-                  onChange={(e) => setImage({ file: e.target.files[0] })}
+                  onChange={(e) => {
+                    setImage({ file: e.target.files[0] });
+                    imageValid();
+                  }}
                 />
                 {noImage ? (
                   <FormHelperText error>Select a image</FormHelperText>

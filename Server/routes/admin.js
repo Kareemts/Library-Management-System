@@ -12,6 +12,9 @@ const {
   getIssuedBooks,
   getStudentInfo,
   getBookInfo,
+  editBookInfo,
+  editStudentInfo,
+  editStudentInfoWithImage,
 } = require('../controller/adminController');
 var router = express.Router();
 
@@ -50,5 +53,13 @@ router.get('/getStudentInfo', getStudentInfo);
 
 /* router for getting book info */
 router.get('/getBookInfo', getBookInfo);
+
+/* router for updating book info */
+router.put('/editBookInfo', editBookInfo);
+
+/* router for updating student  info */
+router.put('/editStudentInfo', editStudentInfo);
+
+router.put('/editStudentInfoWithImage', editStudentInfoWithImage);
 
 module.exports = router;

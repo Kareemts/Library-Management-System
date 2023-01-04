@@ -2,22 +2,62 @@ import styled from '@emotion/styled';
 import { Button, Divider, Modal, TextField, Typography } from '@mui/material';
 import { Box, Stack } from '@mui/system';
 import React, { useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { axiosUrl } from '../../axios/axiosInstance';
 const StyledModal = styled(Modal)({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
 });
 
-const EditBooks = ({ open, setOpen, bookInfo }) => {
+const EditBooks = ({ open, setOpen, bookId }) => {
   const naviget = useNavigate();
   const [name, setName] = useState('');
-  const [bookNo, setBookNo] = useState(bookInfo.bookNo);
+  const [bookNo, setBookNo] = useState('');
   const [author, setAuthor] = useState('');
   const [edition, setEdition] = useState('');
   const [publisher, setPublisher] = useState('');
 
-  console.log(bookNo);
+  useEffect(() => {
+    axiosUrl
+      .get('/getBookInfo', {
+        params: { bookId },
+      })
+      .then((result) => {
+        setBookNo(result.data.bookNo);
+        setName(result.data.name);
+        setAuthor(result.data.author);
+        setEdition(result.data.edition);
+        setPublisher(result.data.publisher);
+      })
+      .catch((err) => {
+        console.log(err);
+        naviget('/error');
+      });
+  }, [naviget, bookId]);
+
+  const editInfo = () => {
+    axiosUrl
+      .put('/editBookInfo', {
+        bookId,
+        name,
+        bookNo,
+        author,
+        edition,
+        publisher,
+      })
+      .then((result) => {
+        console.log(result.data);
+        if (result.data.update) {
+          setOpen(false);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        naviget('/error');
+      });
+  };
 
   return (
     <div>
@@ -106,7 +146,7 @@ const EditBooks = ({ open, setOpen, bookInfo }) => {
               <Button
                 variant="contained"
                 size={'small'}
-                // onClick={() => AddNewBooks()}
+                onClick={() => editInfo()}
               >
                 change
               </Button>

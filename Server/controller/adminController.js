@@ -213,11 +213,102 @@ const getBookInfo = async (req, res) => {
     const book = await schema.books_data.findOne({
       _id: req.query.bookId,
     });
-    console.log(book);
     res.status(200).json(book);
   } catch (error) {
     res.status(500).json(error);
   }
+};
+
+const editBookInfo = async (req, res) => {
+  try {
+    const book = await schema.books_data.updateOne(
+      {
+        _id: req.body.bookId,
+      },
+      {
+        $set: {
+          bookNo: req.body.bookNo,
+          name: req.body.name,
+          author: req.body.author,
+          edition: req.body.edition,
+          publisher: req.body.publisher,
+        },
+      }
+    );
+    res.status(200).json({ update: true });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+const editStudentInfo = async (req, res) => {
+  try {
+    const book = await schema.student_data.updateOne(
+      {
+        _id: req.body.studentId,
+      },
+      {
+        $set: {
+          name: req.body.name,
+          course: req.body.course,
+          email: req.body.email,
+          mobile: req.body.mobile,
+          imageName: req.body.image,
+        },
+      }
+    );
+    res.status(200).json({ update: true });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+const editStudentInfoWithImage = (req, res) => {
+  const data = {};
+  data.name = req.query.name;
+  data.course = req.query.course;
+  data.email = req.query.email;
+  data.mobile = req.query.mobile;
+
+  const storage = multer.diskStorage({
+    destination: path.join(__dirname, '../public/', 'images'),
+    filename: (req, file, cb) => {
+      data.imageName = file.originalname + '-' + Date.now();
+      cb(null, data.imageName + '.png');
+    },
+  });
+
+  const upload = multer({ storage: storage }).single('file');
+
+  upload(req, res, (err) => {
+    if (!req.file) {
+      console.log('no file');
+      res.status(200).json({ noFile: true });
+    } else {
+      schema.student_data
+        .updateOne(
+          {
+            _id: req.query.studentId,
+          },
+          {
+            $set: {
+              name: data.name,
+              course: data.course,
+              email: data.email,
+              mobile: data.mobile,
+              imageName: data.imageName,
+            },
+          }
+        )
+        .then((result) => {
+          res.status(200).json({ update: true });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json(err);
+        });
+    }
+  });
 };
 
 module.exports = {
@@ -233,4 +324,7 @@ module.exports = {
   getIssuedBooks,
   getStudentInfo,
   getBookInfo,
+  editBookInfo,
+  editStudentInfo,
+  editStudentInfoWithImage,
 };

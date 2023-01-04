@@ -11,6 +11,7 @@ import { Box } from '@mui/system';
 import React, { useState } from 'react';
 import { axiosUrl } from '../../axios/axiosInstance';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 const StyledModal = styled(Modal)({
   display: 'flex',
   alignItems: 'center',
@@ -24,22 +25,68 @@ const EditStudent = ({ open, setOpen, studentId }) => {
   const [email, setEmail] = useState('');
   const [mobile, setMobile] = useState('');
   const [image, setImage] = useState('');
-  const [userInfo, setUserInfo] = useState({});
 
-//   if (studentId !== '') {
-//     axiosUrl
-//       .get('/getStudentInfo', {
-//         params: { studentId },
-//       })
-//       .then((result) => {
-//         setUserInfo(result.data);
-//         console.log(result.data);
-//       })
-//       .catch((err) => {
-//         console.log(err);
-//         naviget('/error');
-//       });
-//   }
+  useEffect(() => {
+    axiosUrl
+      .get('/getStudentInfo', {
+        params: { studentId },
+      })
+      .then((result) => {
+        setName(result.data.name);
+        setCourse(result.data.course);
+        setEmail(result.data.email);
+        setMobile(result.data.mobile);
+        setImage(result.data.imageName);
+      })
+      .catch((err) => {
+        console.log(err);
+        naviget('/error');
+      });
+  }, [naviget, studentId]);
+
+  const editInfo = () => {
+    if (image.file) {
+      const data = new FormData();
+      data.append('file', image.file);
+
+      axiosUrl
+        .put('/editStudentInfoWithImage', data, {
+          params: {
+            studentId,
+            name,
+            course,
+            email,
+            mobile,
+            image,
+          },
+        })
+        .then((result) => {
+          console.log(result.data);
+          if (result.data.update) {
+            setOpen(false);
+          }
+        })
+        .catch((err) => {});
+    } else {
+      axiosUrl
+        .put('/editStudentInfo', {
+          studentId,
+          name,
+          course,
+          email,
+          mobile,
+          image,
+        })
+        .then((result) => {
+          if (result.data.update) {
+            setOpen(false);
+          }
+        })
+        .catch((err) => {});
+    }
+
+    console.log(image);
+  };
 
   return (
     <div>
@@ -125,7 +172,7 @@ const EditStudent = ({ open, setOpen, studentId }) => {
               <Button
                 variant="contained"
                 size={'small'}
-                // onClick={() => AddNewStudents()}
+                onClick={() => editInfo()}
               >
                 change
               </Button>
